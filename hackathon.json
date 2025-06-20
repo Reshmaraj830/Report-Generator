@@ -1,0 +1,596 @@
+{
+  "name": "hackathon",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "triggerAtDayOfMonth": 25,
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        120
+      ],
+      "id": "b79cb812-7258-4d5d-a087-e56c72bc570e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dvGpAvd3_pno1WcF1qpjzL6NIYGKMG5B2LsVsTtS5Bo",
+          "mode": "list",
+          "cachedResultName": "Sample Attendance",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dvGpAvd3_pno1WcF1qpjzL6NIYGKMG5B2LsVsTtS5Bo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "marks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dvGpAvd3_pno1WcF1qpjzL6NIYGKMG5B2LsVsTtS5Bo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        20,
+        120
+      ],
+      "id": "67e448d6-1a3d-4e6f-a665-ecab47af03bf",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e53gCEAOtTJfb9eo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['totalScore(50)'] }}",
+                    "rightValue": 25,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "a157f3ae-dee5-42f5-8ac1-6a9563e64ab4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fail"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "35822e2b-368b-4c3c-b09a-2edfdf550fcb",
+                    "leftValue": "={{ $json['totalScore(50)'] }}",
+                    "rightValue": 25,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        240,
+        20
+      ],
+      "id": "b6a8098e-7408-4d4c-9554-86b7f4484e1e",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=From the provided spreadsheet containing student names, departments, and total scores, generate a performance report for each department in the following format:\n\nTotal Students:\nnumber of passed:\nNumber of failed:\nSummary Report:\n\nAnalyse from the given sheet:\n{{ $json['student_name'] }}\n{{ $json['totalScore(50)'] }}\n{{ $json['branch'] }}\n{{ $json['batch'] }}\n{{ $json['Max Marks'] }}\n\n\nDear Sir,\n\nReport of {{ $json['branch'] }}:\nGenerated Report\n\nBest regards\n\nRemove \"Okay, I'm ready to help you generate those departmental performance reports.  Based on your example input, I'll use the score of 50 as the total score and assume any score below half of the total i.e. 25, indicates failure.  Here's the template I'll use for each department\"\n\nStricly i need only summarise report.\n\nStricly remove \" Okay, I will generate the B.E. EEE department performance report based on the data you provided\"\n\nI want a good readable mail format starting with\nExemplar\nRespected Professor\n\nThe Prepinsta Employability Test of last week is .....\n\nStrictly follow tghe exelpler",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant going to make a report of the indiviudal branch wise report\n\n\nExemplar\nRespected Professor\n\nThe Prepinsta Employability Test of last week is .....\n\nStrictly follow tghe exelpler"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        480,
+        240
+      ],
+      "id": "673f7c29-30cf-46b6-b368-3d3a3b4e6f10",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-001",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        500,
+        420
+      ],
+      "id": "ea417e5a-175d-4423-853f-6129f57d8afb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cONMJPhLEVpKDR4Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const students = $input.all().map((item) => item.json);\nlet branches = [...new Set(students.map((student) => student.branch))];\n\nlet markdown = \"\";\n\nbranches.forEach((branch) => {\n  markdown += `### Branch: ${branch}\\n\\n`;\n  students\n    .filter((student) => student.branch === branch)\n    .forEach((student) => {\n      markdown += `- **${student.student_name}** – Marks: ${student[\"totalScore(50)\"]} – Feedback: ${student.Feedback}\\n`;\n    });\n  markdown += \"\\n\";\n});\n\nreturn { markdown };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2140,
+        -1560
+      ],
+      "id": "17dabf86-0e98-4876-8b29-6b5613d7b243",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sheetsData = $(\"Google Sheets\")\n  .all()\n  .map((item) => item.json);\n\nconst groupedData = sheetsData.reduce((acc, item) => {\n  const key = item.branch;\n  if (!acc[key]) {\n    acc[key] = [];\n  }\n  acc[key].push(item);\n  return acc;\n}, {});\n\nreturn groupedData;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2300,
+        -1580
+      ],
+      "id": "33924d4b-9dca-4f7b-88ba-25ffd8318713",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_UxMZViHGDCehmcQ-Kh_Vqp6q__DqeKd_W7ZzniLyTY",
+          "mode": "list",
+          "cachedResultName": "hod",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_UxMZViHGDCehmcQ-Kh_Vqp6q__DqeKd_W7ZzniLyTY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_UxMZViHGDCehmcQ-Kh_Vqp6q__DqeKd_W7ZzniLyTY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        880,
+        240
+      ],
+      "id": "51292a9e-a635-4b73-8d0b-55329240fbe8",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e53gCEAOtTJfb9eo",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.mailid }}\n",
+        "subject": "Test Summary",
+        "emailType": "text",
+        "message": "=Respected Professor\n\nHere is the test report of Prepinsta Employability Test of this month\n\n{{ $('AI Agent').item.json.output }}\n\nRegards\nReshma Raj\nDT/CLT",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Reshma"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1060,
+        240
+      ],
+      "id": "006ec69b-35e2-4721-802d-fbc176fd7297",
+      "name": "Gmail",
+      "webhookId": "cdc25392-1ce3-4364-9b64-73860ffb9b84",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dVP4lTAOIxl2ETh4",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.output }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "B.E. EEE",
+              "description": "Test Summary"
+            },
+            {
+              "name": "B.E. Mech",
+              "description": "Test Summary"
+            },
+            {
+              "name": "B.E. ECE",
+              "description": "Test Summary"
+            },
+            {
+              "name": "B.TECH AI/ML",
+              "description": "Test Summary"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.1,
+      "position": [
+        -1920,
+        -1600
+      ],
+      "id": "96791f7d-0a7e-43fd-9b46-d206f7497300",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets').item.json['email'] }}",
+        "subject": "Test Result",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        940,
+        -380
+      ],
+      "id": "2defa032-df2a-40cd-b8e8-211e4842972a",
+      "name": "Gmail1",
+      "webhookId": "b74fde36-e18c-4dc0-b1c9-b1e91fb0fdb4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "NQlI7z48CCXu2jos",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-001",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1820,
+        -1360
+      ],
+      "id": "5958dfdd-3eaf-41df-890b-608aaf41ff55",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cONMJPhLEVpKDR4Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets').item.json['email'] }}",
+        "subject": "Test Result",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        840,
+        -80
+      ],
+      "id": "7af82f9c-e42d-4bd0-a82b-2f84abb6f79a",
+      "name": "Gmail2",
+      "webhookId": "bba5cdbe-3830-49ab-a8af-72457b41018c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "NQlI7z48CCXu2jos",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=From the raw data of the PrepInsta Employability Test in the Google Sheet, identify all students who have failed the test. For each failed student, send a personalized email to their email ID informing them that they have not passed the test conducted last week. The email should clearly mention their name, department, score obtained, and the total possible score. The tone should be polite, constructive, and professional. Use the data provided in the sheet which includes: Sl. No., Name, Department, Email ID, Test Title, and Total Score.\nUse data from\n{{ $json['student_name'] }}\n{{ $json['email'] }}\n{{ $json['branch'] }}\n{{ $json['totalScore(50)'] }}\n\nTotal marks id the  mark in the table name\n{{ $json['totalScore(50)'] }}\n\n\nPass Mark is half of the total mark\n\nI dont want to start my mail with \"okay, i will use  the provided  data......\"\n\n\nRemove in so \" generated mail Okay, I can create the email(s) you need. Based on the data you provided, here's the personalized email for the student who failed the PrepInsta Employability Test\"\n\nexemplar:\n\nSubject: Result Notification - PrepInsta Employability Test\n\nDear [Student Name],\n\nWe would like to inform you that you have not passed the PrepInsta Employability Test conducted last week.\n\nDetails:\n• Name: [Student Name]\n• Department: [Department]\n• Score: [Your Score] / [Total Marks]\n\nWe encourage you to review the topics and attend upcoming sessions for better performance.\n\nBest regards,\n[Reshma Raj, DT/CLT]\nHuman: From the raw data of the PrepInsta Employability Test in the Google Sheet, identify all students who have failed the test. For each failed student, send a personalized email to their email ID informing them that they have not passed the test conducted last week. The email should clearly mention their name, department, score obtained, and the total possible score. The tone should be polite, constructive, and professional. Use the data provided in the sheet which includes: Sl. No., Name, Department, Email ID, Test Title, and Total Score.\nUse data from\nmeyappan.s.ece.2023\nyuvarani.e.dt@snsgroups.com\n628895\nB.E. ECE\n19\n\nTotal marks id the mark in the table name\n19\n\nPass Mark is half of the total mark\n\nTha mail should follow the strict exemplar",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant. Craft a mail\nrule:\n\nSubject: Result Notification - PrepInsta Employability Test\n\nDear [Student Name],\n\nWe would like to inform you that you have not passed the PrepInsta Employability Test conducted last week.\n\nDetails:\n• Name: [Student Name]\n• Department: [Department]\n• Score: [Your Score] / [Total Marks]\n\nWe encourage you to review the topics and attend upcoming sessions for better performance.\n\nBest regards,\n[Your Institution Name or Sender Name]\nHuman: From the raw data of the PrepInsta Employability Test in the Google Sheet, identify all students who have failed the test. For each failed student, send a personalized email to their email ID informing them that they have not passed the test conducted last week. The email should clearly mention their name, department, score obtained, and the total possible score. The tone should be polite, constructive, and professional. Use the data provided in the sheet which includes: Sl. No., Name, Department, Email ID, Test Title, and Total Score.\nUse data from\nmeyappan.s.ece.2023\nyuvarani.e.dt@snsgroups.com\n628895\nB.E. ECE\n19\n\nTotal marks id the mark in the table name\n19\n\nPass Mark is half of the total mark\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        540,
+        -380
+      ],
+      "id": "c173beea-7cc4-4e10-ae6d-aea64b452798",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        540,
+        -220
+      ],
+      "id": "45a6ca70-2f54-42d9-b913-1f4ddb46b558",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cONMJPhLEVpKDR4Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=From the raw data of the PrepInsta Employability Test in the Google Sheet, identify all students who have passed the test. For each passed student, send a personalized email to their email ID informing them that they have  passed the test conducted last week. The email should clearly mention their name, department, score obtained, and the total possible score. The tone should be polite, constructive, and professional. Use the data provided in the sheet which includes: Sl. No., Name, Department, Email ID, Test Title, and Total Score.\nUse data from\n{{ $json.student_name }}\n{{ $json.email }}\n{{ $json.branch }}\n{{ $json['totalScore(50)'] }}\nTake Test Maximum marks from the Number in totalscore table name\n\n{{ $json['Max Marks'] }}\n\nPass Mark is half of the total mark\n\nI dont want to start my mail with \"okay, i will use  the provided  data......\"\n\n\nRemove in so \" generated mail Okay, I can create the email(s) you need. Based on the data you provided, here's the personalized email for the student who failed the PrepInsta Employability Test\"\n\nexemplar:\n\nSubject: Result Notification - PrepInsta Employability Test\n\nDear [Student Name],\n\nWe would like to inform you that you have passed the PrepInsta Employability Test conducted last week.\n\nDetails:\n• Name: [Student Name]\n• Department: [Department]\n• Score: [Your Score]\n\nWe encourage you to review the topics and attend upcoming sessions for better performance.\n\nBest regards,\n[Reshma Raj, DT/CLT]\n\nTha mail should follow the strict exemplar\n\nHuman: From the raw data of the PrepInsta Employability Test in the Google Sheet, identify all students who have failed the test. For each failed student, send a personalized email to their email ID informing them that they have not passed the test conducted last week. The email should clearly mention their name, department, score obtained, and the total possible score. The tone should be polite, constructive, and professional. Use the data provided in the sheet which includes: Sl. No., Name, Department, Email ID, Test Title, and Total Score.\n\nTha mail should follow the strict exemplar",
+        "options": {
+          "systemMessage": "Tha mail should follow the strict exemplar\nYou are a helpful assistant\nYou are a helpful assistant. Craft a mail\nrule:\n\nSubject: Result Notification - PrepInsta Employability Test\n\nDear [Student Name],\n\nWe would like to inform you that you have passed the PrepInsta Employability Test conducted last week.\n\nDetails:\n• Name: [Student Name]\n• Department: [Department]\n• Score: [Your Score] / [Total Marks]\n\nWe encourage you to review the topics and attend upcoming sessions for better performance.\n\nBest regards,\n[Your Institution Name or Sender Name]\nHuman: From the raw data of the PrepInsta Employability Test in the Google Sheet, identify all students who have failed the test. For each failed student, send a personalized email to their email ID informing them that they have  passed the test conducted last week. The email should clearly mention their name, department, score obtained, and the total possible score. The tone should be polite, constructive, and professional. Use the data provided in the sheet which includes: Sl. No., Name, Department, Email ID, Test Title, and Total Score.\n\nTotal marks id the mark in the table name\n\n\nPass Mark is half of the total mark\nTha mail should follow the strict exemplar"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        500,
+        -80
+      ],
+      "id": "3c4b8cea-4714-437e-92b4-14d24155bbda",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        520,
+        80
+      ],
+      "id": "bd0afcdf-e920-42d9-81ed-3443f5cce0a2",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cONMJPhLEVpKDR4Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "Code1": {
+      "main": [
+        []
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        []
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail2": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Gmail1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Gmail2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "58c1cb6d-db0e-4e78-a46f-eb1885a5c2e1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6737c4fa1ed5beee4a74d8d34b0b55ddf5d9ffae0991202e573322617fbddc4f"
+  },
+  "id": "E5Mxu53u4SNRhXF2",
+  "tags": []
+}
